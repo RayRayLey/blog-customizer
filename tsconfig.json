@@ -25,7 +25,8 @@
 			"src/*": ["src/*"],
 			"fonts/*": ["src/fonts/*"],
 			"components/*": ["src/components/*"]
-		}
+		},
+		"ignoreDeprecations": "6.0"
 	},
 	"outDir": "./dist/",
 	"include": ["src/**/*"]
