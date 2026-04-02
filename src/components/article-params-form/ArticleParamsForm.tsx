@@ -7,60 +7,112 @@ import {
 	fontFamilyOptions,
 	OptionType,
 	fontSizeOptions,
-	defaultArticleState,
 	fontColors,
 	backgroundColors,
 	contentWidthArr,
+	defaultArticleState,
 } from 'src/constants/articleProps';
-import { useRef, useContext, useEffect } from 'react';
+import {
+	useRef,
+	useEffect,
+	useState,
+	SetStateAction,
+	CSSProperties,
+	useCallback,
+} from 'react';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
 import { Spacer } from 'src/ui/spacer/Spacer';
 import { Text } from 'src/ui/text';
-import { FormContext } from 'src/index';
 
-export const ArticleParamsForm = () => {
-	const {
-		open,
-		handleClose,
-		fontFamily,
-		setFont,
-		fontSize,
-		setSize,
-		fontColor,
-		setColor,
-		backgroundColor,
-		setBackground,
-		contentWidth,
-		setWidth,
-		applyChanges,
-	} = useContext(FormContext);
+type ArticleParamsFormProp = {
+	change: (value: SetStateAction<CSSProperties>) => void;
+};
 
-	const asideRef = useRef<HTMLElement | null>(null);
-
+export const ArticleParamsForm = ({ change }: ArticleParamsFormProp) => {
 	// выбор шрифта
-	const handleFontChange = (newFont: OptionType) => {
+	const [fontFamily, setFont] = useState(defaultArticleState.fontFamilyOption);
+	const handleFontChange = useCallback((newFont: OptionType) => {
 		setFont(newFont);
-	};
+	}, []);
 
 	// размер шрифта
-	const handleSizeChange = (newSize: OptionType) => {
+	const [fontSize, setSize] = useState(defaultArticleState.fontSizeOption);
+	const handleSizeChange = useCallback((newSize: OptionType) => {
 		setSize(newSize);
-	};
+	}, []);
 
 	// выбор цвета шрифта
-	const handleColorChange = (newColor: OptionType) => {
+	const [fontColor, setColor] = useState(defaultArticleState.fontColor);
+	const handleColorChange = useCallback((newColor: OptionType) => {
 		setColor(newColor);
-	};
+	}, []);
 
 	// цвет фона
-	const handleBackgroundChange = (newBackground: OptionType) => {
+	const [backgroundColor, setBackground] = useState(
+		defaultArticleState.backgroundColor
+	);
+	const handleBackgroundChange = useCallback((newBackground: OptionType) => {
 		setBackground(newBackground);
-	};
+	}, []);
 
 	// выбор ширины
-	const handleWidthChange = (newWidth: OptionType) => {
+	const [contentWidth, setWidth] = useState(defaultArticleState.contentWidth);
+	const handleWidthChange = useCallback((newWidth: OptionType) => {
 		setWidth(newWidth);
+	}, []);
+
+	// открытие формы
+	const [open, setOpen] = useState(false);
+
+	const buttonToggle = useCallback(() => {
+		setOpen((prev) => !prev);
+	}, [open]);
+
+	// закрытие
+	const asideRef = useRef<HTMLElement | null>(null);
+	const buttonWrapperRef = useRef<HTMLDivElement | null>(null);
+
+	const handleClickOutside = useCallback(
+		(event: MouseEvent) => {
+			if (!open) return;
+
+			const target = event.target as Node;
+
+			if (
+				asideRef.current &&
+				!asideRef.current.contains(target) &&
+				buttonWrapperRef.current &&
+				!buttonWrapperRef.current.contains(target)
+			) {
+				setOpen(false);
+			}
+		},
+		[open, asideRef, buttonWrapperRef]
+	);
+
+	useEffect(() => {
+		const handler = (event: MouseEvent) => handleClickOutside(event);
+
+		if (open) {
+			document.addEventListener('mousedown', handler);
+		} else {
+			document.removeEventListener('mousedown', handler);
+		}
+
+		return () => {
+			document.removeEventListener('mousedown', handler);
+		};
+	}, [open, handleClickOutside]);
+
+	const clearArticle = () => {
+		change({
+			'--font-family': defaultArticleState.fontFamilyOption.value,
+			'--font-size': defaultArticleState.fontSizeOption.value,
+			'--font-color': defaultArticleState.fontColor.value,
+			'--container-width': defaultArticleState.contentWidth.value,
+			'--bg-color': defaultArticleState.backgroundColor.value,
+		} as CSSProperties);
 	};
 
 	const clearForm = () => {
@@ -71,31 +123,21 @@ export const ArticleParamsForm = () => {
 		setWidth(defaultArticleState.contentWidth);
 	};
 
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (
-				open &&
-				asideRef.current &&
-				!asideRef.current.contains(event.target as Node)
-			) {
-				handleClose();
-			}
-		};
-
-		if (open) {
-			document.addEventListener('mousedown', handleClickOutside);
-		} else {
-			document.removeEventListener('mousedown', handleClickOutside);
-		}
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, [open]);
+	const applyChanges = () => {
+		change({
+			'--font-family': fontFamily.value,
+			'--font-size': fontSize.value,
+			'--font-color': fontColor.value,
+			'--container-width': contentWidth.value,
+			'--bg-color': backgroundColor.value,
+		} as CSSProperties);
+	};
 
 	return (
 		<>
-			<ArrowButton isOpen={open} onClick={handleClose} />
+			<div ref={buttonWrapperRef}>
+				<ArrowButton isOpen={open} onClick={buttonToggle} />
+			</div>
 			<aside
 				ref={asideRef}
 				className={
@@ -148,9 +190,12 @@ export const ArticleParamsForm = () => {
 					<div className={styles.bottomContainer}>
 						<Button
 							title='Сбросить'
-							htmlType='reset'
+							htmlType='button'
 							type='clear'
-							onClick={clearForm}
+							onClick={() => {
+								clearForm();
+								clearArticle();
+							}}
 						/>
 						<Button
 							title='Применить'
