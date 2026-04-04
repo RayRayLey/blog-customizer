@@ -12,21 +12,14 @@ import {
 	contentWidthArr,
 	defaultArticleState,
 } from 'src/constants/articleProps';
-import {
-	useRef,
-	useEffect,
-	useState,
-	SetStateAction,
-	CSSProperties,
-	useCallback,
-} from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
 import { Spacer } from 'src/ui/spacer/Spacer';
 import { Text } from 'src/ui/text';
 
 type ArticleParamsFormProp = {
-	change: (value: SetStateAction<CSSProperties>) => void;
+	change: (value: typeof defaultArticleState) => void;
 };
 
 export const ArticleParamsForm = ({ change }: ArticleParamsFormProp) => {
@@ -107,12 +100,12 @@ export const ArticleParamsForm = ({ change }: ArticleParamsFormProp) => {
 
 	const clearArticle = () => {
 		change({
-			'--font-family': defaultArticleState.fontFamilyOption.value,
-			'--font-size': defaultArticleState.fontSizeOption.value,
-			'--font-color': defaultArticleState.fontColor.value,
-			'--container-width': defaultArticleState.contentWidth.value,
-			'--bg-color': defaultArticleState.backgroundColor.value,
-		} as CSSProperties);
+			fontFamilyOption: defaultArticleState.fontFamilyOption,
+			fontSizeOption: defaultArticleState.fontSizeOption,
+			fontColor: defaultArticleState.fontColor,
+			contentWidth: defaultArticleState.contentWidth,
+			backgroundColor: defaultArticleState.backgroundColor,
+		});
 	};
 
 	const clearForm = () => {
@@ -125,12 +118,12 @@ export const ArticleParamsForm = ({ change }: ArticleParamsFormProp) => {
 
 	const applyChanges = () => {
 		change({
-			'--font-family': fontFamily.value,
-			'--font-size': fontSize.value,
-			'--font-color': fontColor.value,
-			'--container-width': contentWidth.value,
-			'--bg-color': backgroundColor.value,
-		} as CSSProperties);
+			fontFamilyOption: fontFamily,
+			fontSizeOption: fontSize,
+			fontColor: fontColor,
+			contentWidth: contentWidth,
+			backgroundColor: backgroundColor,
+		});
 	};
 
 	return (
