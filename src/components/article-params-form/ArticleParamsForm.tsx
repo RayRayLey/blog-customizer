@@ -11,92 +11,31 @@ import {
 	backgroundColors,
 	contentWidthArr,
 	defaultArticleState,
+	ArticleStateType,
 } from 'src/constants/articleProps';
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
 import { Spacer } from 'src/ui/spacer/Spacer';
 import { Text } from 'src/ui/text';
+import { ArticleFormClose } from '../article-form-close';
 
 type ArticleParamsFormProp = {
 	change: (value: typeof defaultArticleState) => void;
 };
 
 export const ArticleParamsForm = ({ change }: ArticleParamsFormProp) => {
-	// выбор шрифта
-	const [fontFamily, setFont] = useState(defaultArticleState.fontFamilyOption);
-	const handleFontChange = useCallback((newFont: OptionType) => {
-		setFont(newFont);
-	}, []);
-
-	// размер шрифта
-	const [fontSize, setSize] = useState(defaultArticleState.fontSizeOption);
-	const handleSizeChange = useCallback((newSize: OptionType) => {
-		setSize(newSize);
-	}, []);
-
-	// выбор цвета шрифта
-	const [fontColor, setColor] = useState(defaultArticleState.fontColor);
-	const handleColorChange = useCallback((newColor: OptionType) => {
-		setColor(newColor);
-	}, []);
-
-	// цвет фона
-	const [backgroundColor, setBackground] = useState(
-		defaultArticleState.backgroundColor
-	);
-	const handleBackgroundChange = useCallback((newBackground: OptionType) => {
-		setBackground(newBackground);
-	}, []);
-
-	// выбор ширины
-	const [contentWidth, setWidth] = useState(defaultArticleState.contentWidth);
-	const handleWidthChange = useCallback((newWidth: OptionType) => {
-		setWidth(newWidth);
-	}, []);
-
-	// открытие формы
-	const [open, setOpen] = useState(false);
-
-	const buttonToggle = useCallback(() => {
-		setOpen((prev) => !prev);
-	}, [open]);
-
-	// закрытие
-	const asideRef = useRef<HTMLElement | null>(null);
-	const buttonWrapperRef = useRef<HTMLDivElement | null>(null);
-
-	const handleClickOutside = useCallback(
-		(event: MouseEvent) => {
-			if (!open) return;
-
-			const target = event.target as Node;
-
-			if (
-				asideRef.current &&
-				!asideRef.current.contains(target) &&
-				buttonWrapperRef.current &&
-				!buttonWrapperRef.current.contains(target)
-			) {
-				setOpen(false);
-			}
-		},
-		[open, asideRef, buttonWrapperRef]
-	);
-
-	useEffect(() => {
-		const handler = (event: MouseEvent) => handleClickOutside(event);
-
-		if (open) {
-			document.addEventListener('mousedown', handler);
-		} else {
-			document.removeEventListener('mousedown', handler);
-		}
-
-		return () => {
-			document.removeEventListener('mousedown', handler);
+	// изменение параметров формы
+	const [formState, setFormState] = useState(defaultArticleState);
+	
+	const updateFormField = useCallback((field: keyof ArticleStateType) => {
+		return (value: OptionType) => {
+			setFormState((prev) => ({
+				...prev,
+				[field]: value,
+			}));
 		};
-	}, [open, handleClickOutside]);
+	}, []);
 
 	const clearArticle = () => {
 		change({
@@ -109,22 +48,30 @@ export const ArticleParamsForm = ({ change }: ArticleParamsFormProp) => {
 	};
 
 	const clearForm = () => {
-		setFont(defaultArticleState.fontFamilyOption);
-		setSize(defaultArticleState.fontSizeOption);
-		setColor(defaultArticleState.fontColor);
-		setBackground(defaultArticleState.backgroundColor);
-		setWidth(defaultArticleState.contentWidth);
+		setFormState(defaultArticleState);
 	};
 
 	const applyChanges = () => {
 		change({
-			fontFamilyOption: fontFamily,
-			fontSizeOption: fontSize,
-			fontColor: fontColor,
-			contentWidth: contentWidth,
-			backgroundColor: backgroundColor,
+			fontFamilyOption: formState.fontFamilyOption,
+			fontSizeOption: formState.fontSizeOption,
+			fontColor: formState.fontColor,
+			contentWidth: formState.contentWidth,
+			backgroundColor: formState.backgroundColor,
 		});
 	};
+
+	// открытие/закрытие формы
+	const [open, setOpen] = useState(false);
+
+	const buttonToggle = useCallback(() => {
+		setOpen((prev) => !prev);
+	}, [open]);
+
+	const asideRef = useRef<HTMLElement | null>(null);
+	const buttonWrapperRef = useRef<HTMLDivElement | null>(null);
+
+	ArticleFormClose(open, () => setOpen(false), asideRef, buttonWrapperRef);
 
 	return (
 		<>
@@ -145,23 +92,23 @@ export const ArticleParamsForm = ({ change }: ArticleParamsFormProp) => {
 					<Spacer />
 					<Select
 						title='Шрифт'
-						onChange={handleFontChange}
-						selected={fontFamily}
+						onChange={updateFormField('fontFamilyOption')}
+						selected={formState.fontFamilyOption}
 						options={fontFamilyOptions}
 					/>
 					<Spacer />
 					<RadioGroup
 						name='fontSize'
-						selected={fontSize}
+						selected={formState.fontSizeOption}
 						title='Размер шрифта'
 						options={fontSizeOptions}
-						onChange={handleSizeChange}
+						onChange={updateFormField('fontSizeOption')}
 					/>
 					<Spacer />
 					<Select
 						title='Цвет шрифта'
-						onChange={handleColorChange}
-						selected={fontColor}
+						onChange={updateFormField('fontColor')}
+						selected={formState.fontColor}
 						options={fontColors}
 					/>
 					<Spacer />
@@ -169,15 +116,15 @@ export const ArticleParamsForm = ({ change }: ArticleParamsFormProp) => {
 					<Spacer />
 					<Select
 						title='Цвет фона'
-						onChange={handleBackgroundChange}
-						selected={backgroundColor}
+						onChange={updateFormField('backgroundColor')}
+						selected={formState.backgroundColor}
 						options={backgroundColors}
 					/>
 					<Spacer />
 					<Select
 						title='Ширина контента'
-						onChange={handleWidthChange}
-						selected={contentWidth}
+						onChange={updateFormField('contentWidth')}
+						selected={formState.contentWidth}
 						options={contentWidthArr}
 					/>
 					<div className={styles.bottomContainer}>
