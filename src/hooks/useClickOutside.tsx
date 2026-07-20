@@ -1,11 +1,11 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, RefObject } from 'react';
 
-export const ArticleFormClose = (
+export function useClickOutside(
 	isOpen: boolean,
 	close: () => void,
-	formRef: React.RefObject<Element>,
-	buttonRef: React.RefObject<Element>
-) => {
+	formRef: RefObject<Element>,
+	buttonRef: RefObject<Element>
+) {
 	const handleClickOutside = useCallback(
 		(event: MouseEvent) => {
 			if (!isOpen) return;
@@ -37,4 +37,4 @@ export const ArticleFormClose = (
 			document.removeEventListener('mousedown', handler);
 		};
 	}, [isOpen, handleClickOutside]);
-};
+}

@@ -18,7 +18,7 @@ import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
 import { Spacer } from 'src/ui/spacer/Spacer';
 import { Text } from 'src/ui/text';
-import { ArticleFormClose } from '../article-form-close';
+import { useClickOutside } from 'src/hooks/useClickOutside';
 
 type ArticleParamsFormProp = {
 	change: (value: typeof defaultArticleState) => void;
@@ -27,7 +27,7 @@ type ArticleParamsFormProp = {
 export const ArticleParamsForm = ({ change }: ArticleParamsFormProp) => {
 	// изменение параметров формы
 	const [formState, setFormState] = useState(defaultArticleState);
-	
+
 	const updateFormField = useCallback((field: keyof ArticleStateType) => {
 		return (value: OptionType) => {
 			setFormState((prev) => ({
@@ -71,7 +71,7 @@ export const ArticleParamsForm = ({ change }: ArticleParamsFormProp) => {
 	const asideRef = useRef<HTMLElement | null>(null);
 	const buttonWrapperRef = useRef<HTMLDivElement | null>(null);
 
-	ArticleFormClose(open, () => setOpen(false), asideRef, buttonWrapperRef);
+	useClickOutside(open, () => setOpen(false), asideRef, buttonWrapperRef);
 
 	return (
 		<>
